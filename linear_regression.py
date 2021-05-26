@@ -30,13 +30,10 @@ DARKGREEN = (0, 102, 0)
 DARKORANGE = (255, 128, 0)
 WHITE = (255, 255, 255)
 
-MAPFILE = "map.txt"
-TITLE = "Welcome to Tile World!"
-FOOD_ENERGY = 10
+TITLE = "Linear regression"
 display = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
 window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pixel_points = []
-
 
 def draw_text(text, color, size, x, y):
     font_draw = pygame.font.Font(pygame.font.get_default_font(), size)
@@ -46,28 +43,30 @@ def draw_text(text, color, size, x, y):
     window.blit(text_obj, text_rect)
 
 
-def get_tile_color(tile_contents):
-    tile_color = GOLD
-    if tile_contents == "m":
-        tile_color = WHITE
-    if tile_contents == ".":
-        tile_color = WHITE
-    if tile_contents == "p":
-        tile_color = WHITE
-    if tile_contents == "n":
-        tile_color = RED
-    return tile_color
+def draw_map():
+    button = pygame.Rect(350, 100, 200, 50)  # left #top #width #height
+    pygame.draw.rect(window, GREEN, button)
+    # mx, my = pygame.mouse.get_pos()
+    draw_point_enabled = True
+    while draw_point_enabled:
+        for event in pygame.event.get():
+            print('ok')
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pygame.draw.circle(window, BLACK, event.pos, 5, 0)
+                pixel_points.append(event.pos)
+            if button.collidepoint(pygame.mouse.get_pos()) and event.type == pygame.MOUSEBUTTONDOWN:
+                draw_point_enabled = False
+        pygame.display.update()
 
+def draw_grid(surface):
+    for i in range(NUMBER_OF_BLOCKS_WIDE):
+        new_height = round(i * BLOCK_HEIGHT)
+        new_width = round(i * BLOCK_WIDTH)
+        pygame.draw.line(surface, DARKGREY, (BLOCK_HEIGHT, new_height), (SCREEN_WIDTH, new_height), 2)
+        pygame.draw.line(surface, DARKGREY, (new_width, 0), (new_width, SCREEN_HEIGHT - BLOCK_HEIGHT), 2)
+        pygame.draw.line(surface, BLACK, (0, SCREEN_HEIGHT - BLOCK_HEIGHT), (SCREEN_WIDTH, SCREEN_WIDTH - BLOCK_WIDTH), 2)
+        pygame.draw.line(surface, BLACK, (BLOCK_WIDTH, 0), (BLOCK_HEIGHT, SCREEN_HEIGHT), 2)
 
-def draw_map(surface, map_tiles):
-    for j, tile in enumerate(map_tiles):
-        for i, tile_contents in enumerate(tile):
-            # print("{},{}: {}".format(i, j, tile_contents))
-            myrect = pygame.Rect(i * BLOCK_WIDTH, j * BLOCK_HEIGHT, BLOCK_WIDTH, BLOCK_HEIGHT)
-            # pygame.draw.rect(surface, get_tile_color(tile_contents), myrect)
-            if tile_contents == 'p':
-                pygame.draw.circle(window, BLACK, (i * BLOCK_WIDTH, j * BLOCK_HEIGHT), 5, 0)
-                pixel_points.append((i * BLOCK_WIDTH, j * BLOCK_HEIGHT))
     draw_text('y', BLACK, 20, BLOCK_WIDTH / 2, BLOCK_HEIGHT / 2 + 10)
     draw_text('x', BLACK, 20, SCREEN_WIDTH - BLOCK_WIDTH / 2 - 10, SCREEN_HEIGHT - BLOCK_HEIGHT / 2)
     draw_text('0', BLACK, 20, BLOCK_WIDTH / 2, SCREEN_HEIGHT - BLOCK_HEIGHT / 2)
@@ -78,36 +77,16 @@ def draw_map(surface, map_tiles):
         t += 1
         k -= 1
 
-
-def draw_grid(surface):
-    for i in range(NUMBER_OF_BLOCKS_WIDE):
-        new_height = round(i * BLOCK_HEIGHT)
-        new_width = round(i * BLOCK_WIDTH)
-        pygame.draw.line(surface, DARKGREY, (BLOCK_HEIGHT, new_height), (SCREEN_WIDTH, new_height), 2)
-        pygame.draw.line(surface, DARKGREY, (new_width, 0), (new_width, SCREEN_HEIGHT - BLOCK_HEIGHT), 2)
-        pygame.draw.line(surface, BLACK, (0, SCREEN_HEIGHT - BLOCK_HEIGHT), (SCREEN_WIDTH, SCREEN_WIDTH - BLOCK_WIDTH),
-                         2)
-        pygame.draw.line(surface, BLACK, (BLOCK_WIDTH, 0), (BLOCK_HEIGHT, SCREEN_HEIGHT), 2)
-
-
-# y = b0 + b1*x
-# bo - intercept
-# b1 - coef
-# start point e dreapta in punctul x=1
-# end point e dreapta in puctul x=8
-# (0, 0) STANGA SUS (480, 480) DREAPTA JOS
-def draw_linear_regression(surface):
+def draw_linear_regression():
     global pixel_points
     x_points = np.array([x[0] for x in pixel_points]).reshape((-1, 1))
     y_points = np.array([x[1] for x in pixel_points])
     model = LinearRegression().fit(x_points, y_points)
     start_point = (BLOCK_WIDTH, SCREEN_HEIGHT - (model.intercept_ + model.coef_[0]))
     end_point = (SCREEN_WIDTH, SCREEN_HEIGHT - (model.intercept_ + SCREEN_WIDTH * model.coef_[0]))
-    pygame.draw.line(surface, UGLY_PINK, start_point, end_point, 2)
-    pixel_points = []
+    pygame.draw.line(window, UGLY_PINK, start_point, end_point, 2)
 
-
-def game_loop(surface, world_map):
+def check_events():
     points = []
     drawing_enabled = True
     while True:
@@ -115,13 +94,13 @@ def game_loop(surface, world_map):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN and drawing_enabled:
+            elif event.type == pygame.MOUSEBUTTONDOWN and drawing_enabled:
                 print("Click: ({})".format(event.pos))
-                window.set_at(event.pos, RED)
+                # window.set_at(event.pos, RED)
                 pygame.draw.circle(window, RED, event.pos, 5, 0)
                 points.append(event.pos)
             if len(points) > 1:
@@ -130,32 +109,28 @@ def game_loop(surface, world_map):
                 pygame.draw.line(window, (0, 0, 0), pos1, pos2)
                 print(f'line drawn pos1:{pos1} pos2:{pos2}')
                 drawing_enabled = False
-        draw_grid(surface)
-        draw_map(surface, world_map)
-        draw_linear_regression(surface)
+        if not drawing_enabled:
+            draw_linear_regression()
         pygame.display.update()
 
 
 def initialize_game():
     pygame.init()
-    surface = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption(TITLE)
-    surface.fill(WHITE)
-    return surface
+    window.fill(WHITE)
+    return window
 
 
-def read_map():
-    # filepath = os.path.join("likenta", MAPFILE)
-    with open(MAPFILE, 'r') as f:
-        world_map = f.readlines()
-    world_map = [line.strip() for line in world_map]
-    return world_map
+def game_loop(surface):
+    draw_grid(surface)
+    draw_map()
+    check_events()
+    pygame.display.update()
 
 
 def main():
-    world_map = read_map()
     surface = initialize_game()
-    game_loop(surface, world_map)
+    game_loop(surface)
 
 
 if __name__ == "__main__":
