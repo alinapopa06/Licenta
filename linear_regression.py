@@ -50,7 +50,6 @@ def draw_map():
     draw_point_enabled = True
     while draw_point_enabled:
         for event in pygame.event.get():
-            print('ok')
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pygame.draw.circle(window, BLACK, event.pos, 5, 0)
                 pixel_points.append(event.pos)

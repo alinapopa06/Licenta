@@ -65,22 +65,22 @@ def get_tile_color(tile_contents):
         tile_color = RED
     return tile_color
 
-
-def draw_map(surface, map_tiles):
-    for j, tile in enumerate(map_tiles):
-        for i, tile_contents in enumerate(tile):
-            # print("{},{}: {}".format(i, j, tile_contents))
-            myrect = pygame.Rect(i * BLOCK_WIDTH, j * BLOCK_HEIGHT, BLOCK_WIDTH, BLOCK_HEIGHT)
-            # pygame.draw.rect(surface, get_tile_color(tile_contents), myrect)
-            if tile_contents == 'g':
-                pygame.draw.circle(window, GREEN, (i * BLOCK_WIDTH, j * BLOCK_HEIGHT), 5, 0)
-                pixel_points_green.append((i * BLOCK_WIDTH, j * BLOCK_HEIGHT))
-                pixel_points_all.append((i * BLOCK_WIDTH, j * BLOCK_HEIGHT))
-            elif tile_contents == 'r':
-                pygame.draw.circle(window, RED, (i * BLOCK_WIDTH, j * BLOCK_HEIGHT), 5, 0)
-                pixel_points_red.append((i * BLOCK_WIDTH, j * BLOCK_HEIGHT))
-                pixel_points_all.append((i * BLOCK_WIDTH, j * BLOCK_HEIGHT))
-
+def draw_map():
+    button = pygame.Rect(350, 100, 200, 50)  # left #top #width #height
+    pygame.draw.rect(window, GREEN, button)
+    # mx, my = pygame.mouse.get_pos()
+    draw_point_enabled = True
+    while draw_point_enabled:
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == LEFT:
+                pygame.draw.circle(window, GREEN, event.pos, 5, 0)
+                pixel_points_green.append(event.pos)
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == RIGHT:
+                pygame.draw.circle(window, RED, event.pos, 5, 0)
+                pixel_points_red.append(event.pos)
+            if button.collidepoint(pygame.mouse.get_pos()) and event.type == pygame.MOUSEBUTTONDOWN:
+                draw_point_enabled = False
+        pygame.display.update()
 
 def draw_grid(surface):
     for i in range(NUMBER_OF_BLOCKS_WIDE):
@@ -149,7 +149,7 @@ def draw_knn(points, k=3):
 
 def game_loop(surface, world_map):
     draw_grid(surface)
-    draw_map(surface, world_map)
+    draw_map()
     check_event()
     pygame.display.update()
 
