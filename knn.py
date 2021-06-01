@@ -3,7 +3,7 @@ import sys
 import math
 
 SCREEN_WIDTH = 480
-SCREEN_HEIGHT = 480
+SCREEN_HEIGHT = 560
 
 NUMBER_OF_BLOCKS_WIDE = 12
 NUMBER_OF_BLOCKS_HIGH = 12
@@ -57,30 +57,52 @@ def draw_grid():
     for i in range(NUMBER_OF_BLOCKS_WIDE):
         new_height = round(i * BLOCK_HEIGHT)
         new_width = round(i * BLOCK_WIDTH)
-        pygame.draw.line(window, DARKGREY, (BLOCK_HEIGHT, new_height), (SCREEN_WIDTH, new_height), 2)
-        pygame.draw.line(window, DARKGREY, (new_width, 0), (new_width, SCREEN_HEIGHT - BLOCK_HEIGHT), 2)
-        pygame.draw.line(window, BLACK, (0, SCREEN_HEIGHT - BLOCK_HEIGHT), (SCREEN_WIDTH, SCREEN_WIDTH - BLOCK_WIDTH),
-                         2)
-        pygame.draw.line(window, BLACK, (BLOCK_WIDTH, 0), (BLOCK_HEIGHT, SCREEN_HEIGHT), 2)
-        draw_text('y', BLACK, 20, BLOCK_WIDTH / 2, BLOCK_HEIGHT / 2 + 10)
-        draw_text('x', BLACK, 20, SCREEN_WIDTH - BLOCK_WIDTH / 2 - 10, SCREEN_HEIGHT - BLOCK_HEIGHT / 2)
-        draw_text('0', BLACK, 20, BLOCK_WIDTH / 2, SCREEN_HEIGHT - BLOCK_HEIGHT / 2)
-        t, k = 1, 11
-        while t < 10 and k > 0:
-            draw_text(str(t), BLACK, 20, BLOCK_WIDTH / 2, BLOCK_HEIGHT + BLOCK_HEIGHT * (k - 2))
-            draw_text(str(t), BLACK, 20, BLOCK_WIDTH + BLOCK_WIDTH * t, SCREEN_HEIGHT - BLOCK_HEIGHT / 2)
-            t += 1
-            k -= 1
+        pygame.draw.line(window, DARKGREY, (BLOCK_WIDTH, new_height - BLOCK_HEIGHT * 2), (SCREEN_WIDTH, new_height - BLOCK_HEIGHT * 2), 2)
+        pygame.draw.line(window, DARKGREY, (new_width, 0), (new_width, SCREEN_HEIGHT - BLOCK_HEIGHT * 2), 2)
+        pygame.draw.line(window, BLACK, (0, SCREEN_HEIGHT - BLOCK_HEIGHT * 2), (SCREEN_WIDTH, SCREEN_HEIGHT - BLOCK_HEIGHT * 2),
+                          2)
+        pygame.draw.line(window, BLACK, (BLOCK_WIDTH, 0), (BLOCK_WIDTH, SCREEN_HEIGHT - BLOCK_HEIGHT), 2)
+
+    draw_text('y', BLACK, 20, BLOCK_WIDTH / 2, BLOCK_HEIGHT / 2 - 10)
+    draw_text('x', BLACK, 20, SCREEN_WIDTH - BLOCK_WIDTH / 2 - 10, SCREEN_HEIGHT - BLOCK_HEIGHT * 2 + 20)
+    draw_text('0', BLACK, 20, BLOCK_WIDTH / 2, SCREEN_HEIGHT - BLOCK_HEIGHT / 2 - BLOCK_HEIGHT)
+
+
+    t, k = 1, 11
+    while t < 10 and k > 0:
+        draw_text(str(t), BLACK, 20, BLOCK_WIDTH / 2, BLOCK_HEIGHT + BLOCK_HEIGHT * (k - 2) - BLOCK_HEIGHT)
+        draw_text(str(t), BLACK, 20, BLOCK_WIDTH + BLOCK_WIDTH * t, SCREEN_HEIGHT - BLOCK_HEIGHT / 2 - BLOCK_HEIGHT)
+        t += 1
+        k -= 1
 
 
 def draw_map():
     points = []
-    button = pygame.Rect(350, 100, 200, 50)
-    pygame.draw.rect(window, GREEN, button)
+    button_back = pygame.Rect(0, 510, 160, 60)  # left #top #width #height
+    pygame.draw.rect(window, LIGHTGREY, button_back)
+    button_points = pygame.Rect(160, 510, 80, 60)  # left #top #width #height
+    pygame.draw.rect(window, LIGHTGREY, button_points)
+    button_check = pygame.Rect(240, 510, 80, 60)  # left #top #width #height
+    pygame.draw.rect(window, LIGHTGREY, button_check)
+    button_retry = pygame.Rect(320, 510, 160, 60)  # left #top #width #height
+    pygame.draw.rect(window, LIGHTGREY, button_retry)
+    pygame.draw.line(window, BLACK, (0, 510), (510, 510), 2)
+    pygame.draw.line(window, BLACK, (0, 558), (558, 558), 2)
+    # pygame.draw.line(window, BLACK, (0, 510), (0, 558), 2)
+    # pygame.draw.line(window, BLACK, (479, 510), (479, 558), 2)
+    pygame.draw.line(window, BLACK, (158, 510), (158, 558), 2)
+    pygame.draw.line(window, BLACK, (238, 510), (238, 558), 2)
+    pygame.draw.line(window, BLACK, (318, 510), (318, 558), 2)
+    draw_text('Back', BLACK, 20, 76, 534)
+    draw_text('Draw', BLACK, 20, 198, 534)
+    draw_text('Check', BLACK, 20, 278, 534)
+    draw_text('Retry', BLACK, 20, 396, 534)
+    all = pygame.Rect(40, 0, 480, 468)
     draw_point_enabled = True
     draw_pink_enabled = False
     draw_circle_enabled = False
     draw_decision_enabled = False
+    draw_enabled = True
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -91,43 +113,100 @@ def draw_map():
                     pygame.quit()
                     sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == LEFT and draw_point_enabled:
-                pygame.draw.circle(window, GREEN, event.pos, 5, 0)
-                pixel_points_green.append(event.pos)
+                x1, y1, w, h = all
+                x2, y2 = x1 + w, y1 + h
+                x, y = event.pos
+                if x1 < x < x2:
+                    if y1 < y < y2:
+                        pygame.draw.circle(window, GREEN, event.pos, 5, 0)
+                        pixel_points_green.append(event.pos)
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == RIGHT and draw_point_enabled:
-                pygame.draw.circle(window, RED, event.pos, 5, 0)
-                pixel_points_red.append(event.pos)
-            if button.collidepoint(pygame.mouse.get_pos()) and event.type == pygame.MOUSEBUTTONDOWN:
+                x1, y1, w, h = all
+                x2, y2 = x1 + w, y1 + h
+                x, y = event.pos
+                if x1 < x < x2:
+                    if y1 < y < y2:
+                        pygame.draw.circle(window, RED, event.pos, 5, 0)
+                        pixel_points_red.append(event.pos)
+            # de ce daca apaas draw se pune iar punct??? :(:(:(:(:(
+            if button_points.collidepoint(pygame.mouse.get_pos()) and event.type == pygame.MOUSEBUTTONDOWN \
+                    and draw_enabled:
                 draw_point_enabled = False
                 draw_pink_enabled = True
+                draw_decision_enabled = False
+                draw_circle_enabled = False
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == LEFT and draw_pink_enabled \
                     and not draw_circle_enabled and not draw_decision_enabled:
-                print("Click pink: ({})".format(event.pos))
-                if len(points) == 0:
-                    points.append(event.pos)
-                pygame.draw.circle(window, UGLY_PINK, event.pos, 5, 0)
-                draw_pink_enabled = False
-                draw_circle_enabled = True
+                x1, y1, w, h = all
+                x2, y2 = x1 + w, y1 + h
+                x, y = event.pos
+                if x1 < x < x2:
+                    if y1 < y < y2:
+                        print("Click pink: ({})".format(event.pos))
+                        if len(points) == 0:
+                            points.append(event.pos)
+                        pygame.draw.circle(window, UGLY_PINK, event.pos, 5, 0)
+                        draw_pink_enabled = False
+                        draw_circle_enabled = True
+                        draw_point_enabled = False
+                        draw_decision_enabled = False
+                        draw_enabled = False
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == LEFT and not draw_pink_enabled \
                     and draw_circle_enabled and not draw_decision_enabled:
-                print("Click circle: ({})".format(event.pos))
-                # print(points_circle, 'ok')
-                pygame.draw.circle(window, BLACK, event.pos, 10, 5)
-                points_circle.append(event.pos)
-                if len(points_circle) == 3:
-                    draw_decision_enabled = True
-                    draw_circle_enabled = False
-                    draw_pink_enabled = False
+                x1, y1, w, h = all
+                x2, y2 = x1 + w, y1 + h
+                x, y = event.pos
+                if x1 < x < x2:
+                    if y1 < y < y2:
+                        print("Click circle: ({})".format(event.pos))
+                        pygame.draw.circle(window, BLACK, event.pos, 10, 5)
+                        points_circle.append(event.pos)
+                        if len(points_circle) == 3:
+                            draw_decision_enabled = True
+                            draw_circle_enabled = False
+                            draw_pink_enabled = False
+                            draw_point_enabled = False
+                            draw_enabled = False
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == LEFT and not draw_pink_enabled \
                     and not draw_circle_enabled and draw_decision_enabled:
-                print("Click plus: ({})".format(event.pos))
-                draw_text('+', BLACK, 20, event.pos[0], event.pos[1])
-                draw_decision_enabled = False
+                x1, y1, w, h = all
+                x2, y2 = x1 + w, y1 + h
+                x, y = event.pos
+                if x1 < x < x2:
+                    if y1 < y < y2:
+                        print("Click plus: ({})".format(event.pos))
+                        draw_text('+', BLACK, 20, event.pos[0], event.pos[1])
+                        draw_decision_enabled = False
+                        draw_circle_enabled = False
+                        draw_pink_enabled = False
+                        draw_point_enabled = False
+                        draw_enabled = False
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == RIGHT and not draw_pink_enabled \
                     and not draw_circle_enabled and draw_decision_enabled:
-                print("Click minus: ({})".format(event.pos))
-                draw_text('-', BLACK, 20, event.pos[0], event.pos[1])
-                draw_decision_enabled = False
+                x1, y1, w, h = all
+                x2, y2 = x1 + w, y1 + h
+                x, y = event.pos
+                if x1 < x < x2:
+                    if y1 < y < y2:
+                        print("Click minus: ({})".format(event.pos))
+                        draw_text('-', BLACK, 20, event.pos[0], event.pos[1])
+                        draw_decision_enabled = False
+                        draw_circle_enabled = False
+                        draw_pink_enabled = False
+                        draw_point_enabled = False
+                        draw_enabled = False
+            if button_check.collidepoint(pygame.mouse.get_pos()) and event.type == pygame.MOUSEBUTTONDOWN \
+                    and not draw_point_enabled:
                 draw_knn(points)
+                draw_decision_enabled = False
+                draw_circle_enabled = False
+                draw_pink_enabled = False
+                draw_point_enabled = False
+                draw_enabled = False
+            if button_retry.collidepoint(pygame.mouse.get_pos()) and event.type == pygame.MOUSEBUTTONDOWN:
+                main()
+            if button_back.collidepoint(pygame.mouse.get_pos()) and event.type == pygame.MOUSEBUTTONDOWN:
+                pass
         pygame.display.update()
 
 

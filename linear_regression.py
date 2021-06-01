@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 
 SCREEN_WIDTH = 480
-SCREEN_HEIGHT = 480
+SCREEN_HEIGHT = 560
 
 NUMBER_OF_BLOCKS_WIDE = 12
 NUMBER_OF_BLOCKS_HIGH = 12
@@ -29,6 +29,8 @@ GOLD = (153, 153, 0)
 DARKGREEN = (0, 102, 0)
 DARKORANGE = (255, 128, 0)
 WHITE = (255, 255, 255)
+
+VEL = 5
 
 TITLE = "Linear regression"
 display = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -55,27 +57,48 @@ def draw_grid():
     for i in range(NUMBER_OF_BLOCKS_WIDE):
         new_height = round(i * BLOCK_HEIGHT)
         new_width = round(i * BLOCK_WIDTH)
-        pygame.draw.line(window, DARKGREY, (BLOCK_HEIGHT, new_height), (SCREEN_WIDTH, new_height), 2)
-        pygame.draw.line(window, DARKGREY, (new_width, 0), (new_width, SCREEN_HEIGHT - BLOCK_HEIGHT), 2)
-        pygame.draw.line(window, BLACK, (0, SCREEN_HEIGHT - BLOCK_HEIGHT), (SCREEN_WIDTH, SCREEN_WIDTH - BLOCK_WIDTH),
-                         2)
-        pygame.draw.line(window, BLACK, (BLOCK_WIDTH, 0), (BLOCK_HEIGHT, SCREEN_HEIGHT), 2)
+        pygame.draw.line(window, DARKGREY, (BLOCK_WIDTH, new_height - BLOCK_HEIGHT * 2), (SCREEN_WIDTH, new_height - BLOCK_HEIGHT * 2), 2)
+        pygame.draw.line(window, DARKGREY, (new_width, 0), (new_width, SCREEN_HEIGHT - BLOCK_HEIGHT * 2), 2)
+        pygame.draw.line(window, BLACK, (0, SCREEN_HEIGHT - BLOCK_HEIGHT * 2), (SCREEN_WIDTH, SCREEN_HEIGHT - BLOCK_HEIGHT * 2),
+                          2)
+        pygame.draw.line(window, BLACK, (BLOCK_WIDTH, 0), (BLOCK_WIDTH, SCREEN_HEIGHT - BLOCK_HEIGHT), 2)
 
-    draw_text('y', BLACK, 20, BLOCK_WIDTH / 2, BLOCK_HEIGHT / 2 + 10)
-    draw_text('x', BLACK, 20, SCREEN_WIDTH - BLOCK_WIDTH / 2 - 10, SCREEN_HEIGHT - BLOCK_HEIGHT / 2)
-    draw_text('0', BLACK, 20, BLOCK_WIDTH / 2, SCREEN_HEIGHT - BLOCK_HEIGHT / 2)
+    draw_text('y', BLACK, 20, BLOCK_WIDTH / 2, BLOCK_HEIGHT / 2 - 10)
+    draw_text('x', BLACK, 20, SCREEN_WIDTH - BLOCK_WIDTH / 2 - 10, SCREEN_HEIGHT - BLOCK_HEIGHT * 2 + 20)
+    draw_text('0', BLACK, 20, BLOCK_WIDTH / 2, SCREEN_HEIGHT - BLOCK_HEIGHT / 2 - BLOCK_HEIGHT)
+
+
     t, k = 1, 11
     while t < 10 and k > 0:
-        draw_text(str(t), BLACK, 20, BLOCK_WIDTH / 2, BLOCK_HEIGHT + BLOCK_HEIGHT * (k - 2))
-        draw_text(str(t), BLACK, 20, BLOCK_WIDTH + BLOCK_WIDTH * t, SCREEN_HEIGHT - BLOCK_HEIGHT / 2)
+        draw_text(str(t), BLACK, 20, BLOCK_WIDTH / 2, BLOCK_HEIGHT + BLOCK_HEIGHT * (k - 2) - BLOCK_HEIGHT)
+        draw_text(str(t), BLACK, 20, BLOCK_WIDTH + BLOCK_WIDTH * t, SCREEN_HEIGHT - BLOCK_HEIGHT / 2 - BLOCK_HEIGHT)
         t += 1
         k -= 1
 
 
 def draw_map():
     points = []
-    button = pygame.Rect(350, 100, 200, 50)  # left #top #width #height
-    pygame.draw.rect(window, GREEN, button)
+    button_back = pygame.Rect(0, 510, 160, 60)  # left #top #width #height
+    pygame.draw.rect(window, LIGHTGREY, button_back)
+    button_points = pygame.Rect(160, 510, 80, 60)  # left #top #width #height
+    pygame.draw.rect(window, LIGHTGREY, button_points)
+    button_check = pygame.Rect(240, 510, 80, 60)  # left #top #width #height
+    pygame.draw.rect(window, LIGHTGREY, button_check)
+    button_retry = pygame.Rect(320, 510, 160, 60)  # left #top #width #height
+    pygame.draw.rect(window, LIGHTGREY, button_retry)
+    pygame.draw.line(window, BLACK, (0, 510), (510, 510), 2)
+    pygame.draw.line(window, BLACK, (0, 558), (558, 558), 2)
+    # pygame.draw.line(window, BLACK, (0, 510), (0, 558), 2)
+    # pygame.draw.line(window, BLACK, (479, 510), (479, 558), 2)
+    pygame.draw.line(window, BLACK, (158, 510), (158, 558), 2)
+    pygame.draw.line(window, BLACK, (238, 510), (238, 558), 2)
+    pygame.draw.line(window, BLACK, (318, 510), (318, 558), 2)
+    draw_text('Back', BLACK, 20, 76, 534)
+    draw_text('Draw', BLACK, 20, 198, 534)
+    draw_text('Check', BLACK, 20, 278, 534)
+    draw_text('Retry', BLACK, 20, 396, 534)
+    all = pygame.Rect(40, 0, 480, 468)
+    # pygame.draw.rect(window, BLACK, all)
     # mx, my = pygame.mouse.get_pos()
     draw_point_enabled = True
     drawing_enabled = False
@@ -89,24 +112,44 @@ def draw_map():
                     pygame.quit()
                     sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN and draw_point_enabled and not drawing_enabled:
-                pygame.draw.circle(window, BLACK, event.pos, 5, 0)
-                pixel_points.append(event.pos)
-            if button.collidepoint(pygame.mouse.get_pos()) and event.type == pygame.MOUSEBUTTONDOWN \
+                x1, y1, w, h = all
+                x2, y2 = x1 + w, y1 + h
+                x, y = event.pos
+                if x1 < x < x2:
+                    if y1 < y < y2:
+                        pygame.draw.circle(window, BLACK, event.pos, 5, 0)
+                        pixel_points.append(event.pos)
+            if button_points.collidepoint(pygame.mouse.get_pos()) and event.type == pygame.MOUSEBUTTONDOWN \
                     and draw_point_enabled and not drawing_enabled:
                 draw_point_enabled = False
                 drawing_enabled = True
             elif event.type == pygame.MOUSEBUTTONDOWN and drawing_enabled:
                 print("Click: ({})".format(event.pos))
-                # window.set_at(event.pos, RED)
-                pygame.draw.circle(window, RED, event.pos, 5, 0)
-                points.append(event.pos)
+                x1, y1, w, h = all
+                x2, y2 = x1 + w, y1 + h
+                x, y = event.pos
+                if x1 < x < x2:
+                    if y1 < y < y2:
+                        pygame.draw.circle(window, RED, event.pos, 5, 0)
+                        points.append(event.pos)
             if len(points) > 1:
                 pos1 = points.pop()
                 pos2 = points.pop()
-                pygame.draw.line(window, RED, pos1, pos2)
-                print(f'line drawn pos1:{pos1} pos2:{pos2}')
-                drawing_enabled = False
+                x1, y1, w, h = all
+                x2, y2 = x1 + w, y1 + h
+                x, y = event.pos
+                if x1 < x < x2:
+                    if y1 < y < y2:
+                        pygame.draw.line(window, RED, pos1, pos2)
+                        print(f'line drawn pos1:{pos1} pos2:{pos2}')
+                        drawing_enabled = False
+            if button_check.collidepoint(pygame.mouse.get_pos()) and event.type == pygame.MOUSEBUTTONDOWN \
+                    and not draw_point_enabled:
                 draw_linear_regression()
+            if button_retry.collidepoint(pygame.mouse.get_pos()) and event.type == pygame.MOUSEBUTTONDOWN:
+                main()
+            if button_back.collidepoint(pygame.mouse.get_pos()) and event.type == pygame.MOUSEBUTTONDOWN:
+                pass
         pygame.display.update()
 
 
