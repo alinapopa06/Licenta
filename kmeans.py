@@ -1,22 +1,22 @@
 import sys
 import pygame
-import numpy as np
+from sklearn.cluster import KMeans
 from AlgorithmWindowClass import AlgorithmWindowClass
-from sklearn.linear_model import LinearRegression
 # import instructions
 
 
-class AlgorithmLinearRegression(AlgorithmWindowClass):
-    TITLE = "Linear regression"
-
-    def draw_linear_regression(self):
-        x_points = np.array([x[0] for x in self.pixel_points]).reshape((-1, 1))
-        y_points = np.array([x[1] for x in self.pixel_points])
-        model = LinearRegression().fit(x_points, y_points)
-        start_point = (self.BLOCK_WIDTH, self.SCREEN_HEIGHT - (model.intercept_ + model.coef_[0]))
-        end_point = (self.SCREEN_WIDTH, self.SCREEN_HEIGHT - (model.intercept_ + self.SCREEN_WIDTH * model.coef_[0]))
-        pygame.draw.line(self.window, self.UGLY_PINK, start_point, end_point, 2)
-
+class AlgorithmKMeans(AlgorithmWindowClass):
+    TITLE = "K-Means"
+    points_circle = []
+    pixel_points_all = []
+    pixel_points_red = []
+    pixel_points_green = []
+    
+    def draw_kmeans(self, points):
+        kmeans = KMeans(n_clusters=3).fit(points)
+        for i in kmeans.cluster_centers_:
+            pygame.draw.circle(self.window, self.BLUE, i, 5, 0)
+    
     def draw_map(self):
         points = []
         button_back = pygame.Rect(0, 510, 160, 60)  # left #top #width #height
@@ -39,8 +39,6 @@ class AlgorithmLinearRegression(AlgorithmWindowClass):
         self.draw_text('Check', self.BLACK, 20, 278, 534)
         self.draw_text('Retry', self.BLACK, 20, 396, 534)
         all = pygame.Rect(40, 0, 480, 468)
-        # pygame.draw.rect(self.window, self.BLACK, all)
-        # mx, my = pygame.mouse.get_pos()
         draw_point_enabled = True
         drawing_enabled = False
         while True:
@@ -59,7 +57,7 @@ class AlgorithmLinearRegression(AlgorithmWindowClass):
                     if x1 < x < x2:
                         if y1 < y < y2:
                             pygame.draw.circle(self.window, self.BLACK, event.pos, 5, 0)
-                            self.pixel_points.append(event.pos)
+                            points.append(event.pos)
                 if button_points.collidepoint(pygame.mouse.get_pos()) and event.type == pygame.MOUSEBUTTONDOWN \
                         and draw_point_enabled and not drawing_enabled:
                     draw_point_enabled = False
@@ -71,19 +69,19 @@ class AlgorithmLinearRegression(AlgorithmWindowClass):
                     x, y = event.pos
                     if x1 < x < x2:
                         if y1 < y < y2:
-                            pygame.draw.circle(self.window, self.RED, event.pos, 5, 0)
-                            points.append(event.pos)
-
+                            pygame.draw.circle(self.window, self.BLACK, event.pos, 10, 5)
+                            self.points_circle.append(event.pos)
+                            if len(self.points_circle) == 3:
+                                drawing_enabled = False
                 if button_check.collidepoint(pygame.mouse.get_pos()) and event.type == pygame.MOUSEBUTTONDOWN \
                         and not draw_point_enabled:
-                    self.draw_linear_regression()
+                    self.draw_kmeans(points)
                 if button_retry.collidepoint(pygame.mouse.get_pos()) and event.type == pygame.MOUSEBUTTONDOWN:
                     self.main()
                 # if button_back.collidepoint(pygame.mouse.get_pos()) and event.type == pygame.MOUSEBUTTONDOWN:
-                #     instructions.draw_instr_lr()
-
+                #     instructions.draw_instr_kmeans()
             pygame.display.update()
 
 
 if __name__ == "__main__":
-    AlgorithmLinearRegression().main()
+    AlgorithmKMeans().main()
