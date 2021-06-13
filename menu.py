@@ -1,207 +1,175 @@
 import pygame
 import sys
-
-pygame.init()
-running, playing = True, False
-UP_KEY, DOWN_KEY, START_KEY, BACK_KEY = False, False, False, False
-DISPLAY_W, DISPLAY_H = 480, 480
-display = pygame.Surface((DISPLAY_W, DISPLAY_H))
-window = pygame.display.set_mode((DISPLAY_W, DISPLAY_H))
-font_name = pygame.font.get_default_font()
-WHITE, BLUE, GREEN, RED, BLACK = (255, 255, 255), (0, 0, 255), (0, 255, 0), (255, 0, 0), (0, 0, 0)
-mid_w, mid_h = DISPLAY_W / 2, DISPLAY_H / 2
-run_display = True
-run_difficulty = True
-cursor_rect = pygame.Rect(0, 0, 20, 20)
-offset = - 100
-state = "First game"
-First_x, First_y = mid_w, mid_h + 30
-Second_x, Second_y = mid_w, mid_h + 50
-Third_x, Third_y = mid_w, mid_h + 70
-cursor_rect.center = (First_x + offset, First_y)
-
-def draw_text(text, size, x, y):
-    font = pygame.font.Font(font_name, size)
-    text_surface = font.render(text, True, WHITE)
-    text_rect = text_surface.get_rect()
-    text_rect.center = (x, y)
-    display.blit(text_surface, text_rect)
+from instructions import Instructions
+import string
 
 
-def draw_cursor():
-    draw_text('*', 35, cursor_rect.x+20, cursor_rect.y+20)
+class Menu:
+    SCREEN_WIDTH = 480
+    SCREEN_HEIGHT = 560
 
+    MID_HEIGHT = SCREEN_HEIGHT / 2
+    MID_WIDTH = SCREEN_WIDTH / 2
 
-def blit_screen():
-    window.blit(display, (0, 0))
-    pygame.display.update()
-    reset_keys()
+    RIGHT = 1
+    MIDDLE = 2
+    LEFT = 3
 
+    GREY = (50, 50, 50)
+    RED = (255, 0, 0)
+    BLUE = (55, 55, 255)
+    BLACK = (0, 0, 0)
+    GREEN = (0, 200, 0)
+    DARKGREY = (200, 200, 200)
+    LIGHTGREY = (210, 210, 210)
+    UGLY_PINK = (255, 0, 255)
+    BROWN = (153, 76, 0)
+    GOLD = (153, 153, 0)
+    DARKGREEN = (0, 102, 0)
+    DARKORANGE = (255, 128, 0)
+    WHITE = (255, 255, 255)
 
-def display_menu():
-    global run_display
-    run_display = True
-    while run_display:
-        check_events()
-        check_input()
-        display.fill(BLACK)
-        draw_cursor()
-        draw_text('Main Menu', 20, DISPLAY_W / 2, DISPLAY_H / 2 - 20)
-        draw_text("First game", 20, First_x, First_y)
-        draw_text("Second game", 20, Second_x, Second_y)
-        draw_text("Third game", 20, Third_x, Third_y)
-        blit_screen()
-        #reset_keys()
+    VEL = 5
+    offset = - 100
+    TITLE = "Main menu"
+    cursor_rect = pygame.Rect(0, 0, 20, 20)
 
+    First_x, First_y = MID_WIDTH, MID_HEIGHT - 20
+    Second_x, Second_y = MID_WIDTH, MID_HEIGHT
+    Third_x, Third_y = MID_WIDTH, MID_HEIGHT + 20
+    Fourth_x, Fourth_y = MID_WIDTH, MID_HEIGHT + 40
+    Fifth_x, Fifth_y = MID_WIDTH, MID_HEIGHT + 60
+    Sixth_x, Sixth_y = MID_WIDTH, MID_HEIGHT + 80
+    cursor_rect.center = (First_x + offset, First_y)
+    display = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+    window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    button_id3 = pygame.Rect(MID_WIDTH - 30, MID_HEIGHT - 30, 50, 20)
+    button_dbscan = pygame.Rect(MID_WIDTH - 50, MID_HEIGHT - 10, 100, 20)
+    button_lr = pygame.Rect(MID_WIDTH - 90, MID_HEIGHT + 10, 180, 20)
+    button_kmeans = pygame.Rect(MID_WIDTH - 100, MID_HEIGHT + 30, 200, 20)
+    button_knn = pygame.Rect(MID_WIDTH - 105, MID_HEIGHT + 50, 210, 20)
+    button_svm = pygame.Rect(MID_WIDTH - 120, MID_HEIGHT + 70, 240, 20)
 
-def display_menu_difficulty():
-    global run_display
-    while run_difficulty:
-        reset_keys()
-        check_events()
-        check_input_difficulty()
-        display.fill(BLACK)
-        draw_text('Choose difficulty', 20, DISPLAY_W / 2, DISPLAY_H / 2 - 20)
-        draw_text("Easy", 20, First_x, First_y)
-        draw_text("Medium", 20, Second_x, Second_y)
-        draw_text("Hard", 20, Third_x, Third_y)
-        draw_cursor()
-        blit_screen()
+    def initialize_game(self):
+        pygame.init()
+        pygame.display.set_caption(self.TITLE)
+        self.window.fill(self.BLACK)
+        return self.window
 
+    def draw_text(self, text, color, size, x, y):
+        font_draw = pygame.font.Font(pygame.font.get_default_font(), size)
+        text_obj = font_draw.render(text, True, color)
+        text_rect = text_obj.get_rect()
+        text_rect.center = (x, y)
+        self.window.blit(text_obj, text_rect)
 
-def move_cursor():
-    global state
-    if DOWN_KEY:
-        if state == 'First game':
-            cursor_rect.center = (Second_x + offset, Second_y)
-            state = 'Second game'
-        elif state == 'Second game':
-            cursor_rect.center = (Third_x + offset, Third_y)
-            state = 'Third game'
-        elif state == 'Third game':
-            cursor_rect.center = (First_x + offset, First_y)
-            state = 'First game'
-    elif UP_KEY:
-        if state == 'First game':
-            cursor_rect.center = (Third_x + offset, Third_y)
-            state = 'Third game'
-        elif state == 'Second game':
-            cursor_rect.center = (First_x + offset, First_y)
-            state = 'First game'
-        elif state == 'Third game':
-            cursor_rect.center = (Second_x + offset, Second_y)
-            state = 'Second game'
+    def draw_cursor(self):
+        self.draw_text('-', self.WHITE, 35, self.cursor_rect.x - 20, self.cursor_rect.y + 10)
+        self.draw_text('-', self.WHITE, 35, self.cursor_rect.x + 240, self.cursor_rect.y + 10)
 
+    def menu(self):
+        self.initialize_game()
+        state = "ID3"
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if self.button_id3.collidepoint(pygame.mouse.get_pos()):
+                        Instructions().draw_instr('id3')
+                    if self.button_dbscan.collidepoint(pygame.mouse.get_pos()):
+                        Instructions().draw_instr('dbscan')
+                    if self.button_lr.collidepoint(pygame.mouse.get_pos()):
+                        Instructions().draw_instr('lr')
+                    if self.button_kmeans.collidepoint(pygame.mouse.get_pos()):
+                        Instructions().draw_instr('kmeans')
+                    if self.button_knn.collidepoint(pygame.mouse.get_pos()):
+                        Instructions().draw_instr('knn')
+                    if self.button_svm.collidepoint(pygame.mouse.get_pos()):
+                        Instructions().draw_instr('svm')
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        pygame.quit()
+                        sys.exit()
+                    if event.key == pygame.K_RETURN:  # enter
+                        if state == 'ID3':
+                            Instructions().draw_instr('id3')
+                        elif state == 'DBSCAN':
+                            Instructions().draw_instr('dbscan')
+                        elif state == 'k-means clustering':
+                            Instructions().draw_instr('kmeans')
+                        elif state == 'Linear regression':
+                            Instructions().draw_instr('lr')
+                        elif state == 'k-nearest neighbours':
+                            Instructions().draw_instr('knn')
+                        elif state == 'Support vector machine':
+                            Instructions().draw_instr('svm')
+                    if event.key == pygame.K_DOWN:
+                        if state == 'ID3':
+                            self.cursor_rect.center = (self.Second_x + self.offset, self.Second_y)
+                            state = 'DBSCAN'
+                        elif state == 'DBSCAN':
+                            self.cursor_rect.center = (self.Third_x + self.offset, self.Third_y)
+                            state = 'Linear regression'
+                        elif state == 'Linear regression':
+                            self.cursor_rect.center = (self.Fourth_x + self.offset, self.Fourth_y)
+                            state = 'k-means clustering'
+                        elif state == 'k-means clustering':
+                            self.cursor_rect.center = (self.Fifth_x + self.offset, self.Fifth_y)
+                            state = 'k-nearest neighbours'
+                        elif state == 'k-nearest neighbours':
+                            self.cursor_rect.center = (self.Sixth_x + self.offset, self.Sixth_y)
+                            state = 'Support vector machine'
+                        elif state == 'Support vector machine':
+                            self.cursor_rect.center = (self.First_x + self.offset, self.First_y)
+                            state = 'ID3'
+                    if event.key == pygame.K_UP:
+                        if state == 'ID3':
+                            self.cursor_rect.center = (self.Sixth_x + self.offset, self.Sixth_y)
+                            state = 'Support vector machine'
+                        elif state == 'DBSCAN':
+                            self.cursor_rect.center = (self.First_x + self.offset, self.First_y)
+                            state = 'ID3'
+                        elif state == 'Linear regression':
+                            self.cursor_rect.center = (self.Second_x + self.offset, self.Second_y)
+                            state = 'DBSCAN'
+                        elif state == 'k-means clustering':
+                            self.cursor_rect.center = (self.Third_x + self.offset, self.Third_y)
+                            state = 'Linear regression'
+                        elif state == 'k-nearest neighbours':
+                            self.cursor_rect.center = (self.Fourth_x + self.offset, self.Fourth_y)
+                            state = 'k-means clustering'
+                        elif state == 'Support vector machine':
+                            self.cursor_rect.center = (self.Fifth_x + self.offset, self.Fifth_y)
+                            state = 'k-nearest neighbours'
+                self.blit_screen()
+                pygame.display.update()
 
-def check_input():
-    global run_display, run_difficulty
-    move_cursor()
-    first = False
-    second = False
-    third = False
-    if START_KEY:
-        if state == 'First game':
-            first = True
-            display_menu_difficulty()
-        elif state == 'Second game':
-            second = True
-            display_menu_difficulty()
-        elif state == 'Third game':
-            third = True
-            display_menu_difficulty()
-        run_display = False
-        run_difficulty = False
+    def blit_screen(self):
+        self.window.blit(self.display, (0, 0))
+        self.draw_cursor()
+        # pygame.draw.rect(self.window, self.BLUE, self.button_id3)
+        # pygame.draw.rect(self.window, self.BLUE, self.button_dbscan)
+        # pygame.draw.rect(self.window, self.BLUE, self.button_lr)
+        # pygame.draw.rect(self.window, self.BLUE, self.button_kmeans)
+        # pygame.draw.rect(self.window, self.BLUE, self.button_knn)
+        # pygame.draw.rect(self.window, self.BLUE, self.button_svm)
+        self.draw_text('Main menu', self.WHITE, 20, self.SCREEN_WIDTH / 2, self.SCREEN_HEIGHT / 2 + self.offset)
+        self.draw_text("ID3", self.WHITE, 20, self.First_x, self.First_y)
+        self.draw_text("DBSCAN", self.WHITE, 20, self.Second_x, self.Second_y)
+        self.draw_text("Linear regression", self.WHITE, 20, self.Third_x, self.Third_y)
+        self.draw_text("k-means clustering", self.WHITE, 20, self.Fourth_x, self.Fourth_y)
+        self.draw_text("k-nearest neighbours", self.WHITE, 20, self.Fifth_x, self.Fifth_y)
+        self.draw_text("Support vector machine", self.WHITE, 20, self.Sixth_x, self.Sixth_y)
 
-
-def check_input_difficulty():
-    global run_display, run_difficulty
-    move_cursor()
-    # first = check_input().first
-    if START_KEY:
-        if state == 'Easy':
-            # if first == True:
-            print('hai')
-            display_first_game()
-            if (state == 'Second game'):
-                display_second_game()
-            if (state == 'Third game'):
-                display_third_game()
-        elif state == 'Medium':
-            if (state == 'First game'):
-                display_first_game()
-            if (state == 'Second game'):
-                display_second_game()
-            if (state == 'Third game'):
-                display_third_game()
-        elif state == 'Hard':
-            if (state == 'First game'):
-                display_first_game()
-            if (state == 'Second game'):
-                display_second_game()
-            if (state == 'Third game'):
-                display_third_game()
-        run_display = False
-        run_difficulty = False
-
-def display_first_game():
-    print('ok')
-
-def display_second_game():
-    global run_display
-    while run_difficulty:
-        reset_keys()
-        check_events()
-        check_input_difficulty()
-        display.fill(BLACK)
-        draw_text('Choose difficulty', 20, DISPLAY_W / 2, DISPLAY_H / 2 - 20)
-        draw_text("Easy", 20, First_x, First_y)
-        draw_text("Medium", 20, Second_x, Second_y)
-        draw_text("Hard", 20, Third_x, Third_y)
-        draw_cursor()
-        blit_screen()
-def display_third_game():
-    pass
-
-def game_loop():
-    global playing
-    while playing:
-        check_events()
-        if START_KEY:
-            playing = False
-        display.fill(BLACK)
-        draw_text('Thanks for Playing', 20, DISPLAY_W / 2, DISPLAY_H / 2)
-        window.blit(display, (0, 0))
         pygame.display.update()
-        reset_keys()
 
-
-def check_events(): #verifica ce apasa playerul pe tastatura
-    global run_difficulty, run_display
-    global running, playing, UP_KEY, DOWN_KEY, START_KEY, BACK_KEY
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running, playing, run_difficulty, run_display = False, False, False, False
-            # pygame.quit()
-            # sys.exit()
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_RETURN: #enter
-                START_KEY = True
-            if event.key == pygame.K_ESCAPE:
-                BACK_KEY = True
-            if event.key == pygame.K_DOWN:
-                DOWN_KEY = True
-            if event.key == pygame.K_UP:
-                UP_KEY = True
-
-
-def reset_keys(): #resetez butoanele
-    global UP_KEY, DOWN_KEY, START_KEY, BACK_KEY
-    UP_KEY, DOWN_KEY, START_KEY, BACK_KEY = False, False, False, False
-
-
-def main():
-    display_menu()
-    game_loop()
+    # def main():
+    #     initialize_game()
+    #     menu()
 
 if __name__ == "__main__":
-    main()
+    Menu().menu()
+
+

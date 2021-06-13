@@ -32,9 +32,16 @@ class AlgorithmWindowClass:
 
     VEL = 5
 
+    points = []
     pixel_points = []
 
     TITLE = ""
+
+    all = pygame.Rect(40, 0, 480, 468)
+    button_back = pygame.Rect(0, 510, 160, 60)  # left #top #width #height
+    button_draw = pygame.Rect(160, 510, 80, 60)  # left #top #width #height
+    button_check = pygame.Rect(240, 510, 80, 60)  # left #top #width #height
+    button_retry = pygame.Rect(320, 510, 160, 60)  # left #top #width #height
 
     def __init__(self):
         self.display = pygame.Surface((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
@@ -54,6 +61,20 @@ class AlgorithmWindowClass:
         self.window.blit(text_obj, text_rect)
 
     def draw_grid(self):
+        pygame.draw.rect(self.window, self.LIGHTGREY, self.button_back)
+        pygame.draw.rect(self.window, self.LIGHTGREY, self.button_draw)
+        pygame.draw.rect(self.window, self.LIGHTGREY, self.button_check)
+        pygame.draw.rect(self.window, self.LIGHTGREY, self.button_retry)
+        pygame.draw.line(self.window, self.BLACK, (0, 510), (510, 510), 2)
+        pygame.draw.line(self.window, self.BLACK, (0, 558), (558, 558), 2)
+        pygame.draw.line(self.window, self.BLACK, (158, 510), (158, 558), 2)
+        pygame.draw.line(self.window, self.BLACK, (238, 510), (238, 558), 2)
+        pygame.draw.line(self.window, self.BLACK, (318, 510), (318, 558), 2)
+        self.draw_text('Back', self.BLACK, 20, 76, 534)
+        self.draw_text('Draw', self.BLACK, 20, 198, 534)
+        self.draw_text('Check', self.BLACK, 20, 278, 534)
+        self.draw_text('Retry', self.BLACK, 20, 396, 534)
+
         for i in range(self.NUMBER_OF_BLOCKS_WIDE):
             new_height = round(i * self.BLOCK_HEIGHT)
             new_width = round(i * self.BLOCK_WIDTH)

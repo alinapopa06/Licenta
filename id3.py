@@ -100,8 +100,9 @@ class AlgorithmID3(AlgorithmWindowClass):
                     pass
                 if button_retry.collidepoint(pygame.mouse.get_pos()) and event.type == pygame.MOUSEBUTTONDOWN:
                     self.main()
-                # if button_back.collidepoint(pygame.mouse.get_pos()) and event.type == pygame.MOUSEBUTTONDOWN:
-                #     instructions.draw_instr_id3()
+                if button_back.collidepoint(pygame.mouse.get_pos()) and event.type == pygame.MOUSEBUTTONDOWN:
+                    self.window.fill(self.WHITE)
+                    return
             pygame.display.update()
 
 
