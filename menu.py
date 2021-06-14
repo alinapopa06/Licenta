@@ -43,8 +43,8 @@ class Menu:
     cursor_rect.center = (First_x + offset, First_y)
     display = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
     window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    button_id3 = pygame.Rect(MID_WIDTH - 30, MID_HEIGHT - 30, 50, 20)
-    button_dbscan = pygame.Rect(MID_WIDTH - 50, MID_HEIGHT - 10, 100, 20)
+    button_dbscan = pygame.Rect(MID_WIDTH - 30, MID_HEIGHT - 30, 50, 20)
+    button_adaboost = pygame.Rect(MID_WIDTH - 50, MID_HEIGHT - 10, 100, 20)
     button_lr = pygame.Rect(MID_WIDTH - 90, MID_HEIGHT + 10, 180, 20)
     button_kmeans = pygame.Rect(MID_WIDTH - 100, MID_HEIGHT + 30, 200, 20)
     button_knn = pygame.Rect(MID_WIDTH - 105, MID_HEIGHT + 50, 210, 20)
@@ -69,15 +69,15 @@ class Menu:
 
     def menu(self):
         self.initialize_game()
-        state = "ID3"
+        state = "DBSCAN"
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if self.button_id3.collidepoint(pygame.mouse.get_pos()):
-                        Instructions().draw_instr('id3')
+                    if self.button_adaboost.collidepoint(pygame.mouse.get_pos()):
+                        Instructions().draw_instr('adaboost')
                     if self.button_dbscan.collidepoint(pygame.mouse.get_pos()):
                         Instructions().draw_instr('dbscan')
                     if self.button_lr.collidepoint(pygame.mouse.get_pos()):
@@ -93,10 +93,10 @@ class Menu:
                         pygame.quit()
                         sys.exit()
                     if event.key == pygame.K_RETURN:  # enter
-                        if state == 'ID3':
-                            Instructions().draw_instr('id3')
-                        elif state == 'DBSCAN':
-                            Instructions().draw_instr('dbscan')
+                        if state == 'DBSCAN':
+                            Instructions().draw_instr('DBSCAN')
+                        elif state == 'AdaBoost':
+                            Instructions().draw_instr('AdaBoost')
                         elif state == 'k-means clustering':
                             Instructions().draw_instr('kmeans')
                         elif state == 'Linear regression':
@@ -106,10 +106,10 @@ class Menu:
                         elif state == 'Support vector machine':
                             Instructions().draw_instr('svm')
                     if event.key == pygame.K_DOWN:
-                        if state == 'ID3':
+                        if state == 'DBSCAN':
                             self.cursor_rect.center = (self.Second_x + self.offset, self.Second_y)
-                            state = 'DBSCAN'
-                        elif state == 'DBSCAN':
+                            state = 'AdaBoost'
+                        elif state == 'AdaBoost':
                             self.cursor_rect.center = (self.Third_x + self.offset, self.Third_y)
                             state = 'Linear regression'
                         elif state == 'Linear regression':
@@ -123,17 +123,17 @@ class Menu:
                             state = 'Support vector machine'
                         elif state == 'Support vector machine':
                             self.cursor_rect.center = (self.First_x + self.offset, self.First_y)
-                            state = 'ID3'
+                            state = 'DBSCAN'
                     if event.key == pygame.K_UP:
-                        if state == 'ID3':
+                        if state == 'DBSCAN':
                             self.cursor_rect.center = (self.Sixth_x + self.offset, self.Sixth_y)
                             state = 'Support vector machine'
-                        elif state == 'DBSCAN':
+                        elif state == 'AdaBoost':
                             self.cursor_rect.center = (self.First_x + self.offset, self.First_y)
-                            state = 'ID3'
+                            state = 'DBSCAN'
                         elif state == 'Linear regression':
                             self.cursor_rect.center = (self.Second_x + self.offset, self.Second_y)
-                            state = 'DBSCAN'
+                            state = 'AdaBoost'
                         elif state == 'k-means clustering':
                             self.cursor_rect.center = (self.Third_x + self.offset, self.Third_y)
                             state = 'Linear regression'
@@ -156,8 +156,8 @@ class Menu:
         # pygame.draw.rect(self.window, self.BLUE, self.button_knn)
         # pygame.draw.rect(self.window, self.BLUE, self.button_svm)
         self.draw_text('Main menu', self.WHITE, 20, self.SCREEN_WIDTH / 2, self.SCREEN_HEIGHT / 2 + self.offset)
-        self.draw_text("ID3", self.WHITE, 20, self.First_x, self.First_y)
-        self.draw_text("DBSCAN", self.WHITE, 20, self.Second_x, self.Second_y)
+        self.draw_text("DBSCAN", self.WHITE, 20, self.First_x, self.First_y)
+        self.draw_text("AdaBoost", self.WHITE, 20, self.Second_x, self.Second_y)
         self.draw_text("Linear regression", self.WHITE, 20, self.Third_x, self.Third_y)
         self.draw_text("k-means clustering", self.WHITE, 20, self.Fourth_x, self.Fourth_y)
         self.draw_text("k-nearest neighbours", self.WHITE, 20, self.Fifth_x, self.Fifth_y)

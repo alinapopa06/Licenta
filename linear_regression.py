@@ -13,7 +13,6 @@ class AlgorithmLR(AlgorithmWindowClass):
         x_points = np.array([x[0] for x in self.pixel_points]).reshape((-1, 1))
         y_points = np.array([x[1] for x in self.pixel_points])
         model = LinearRegression().fit(x_points, y_points)
-        print(model.coef_[0])
         if model.coef_[0] >= 0:
             start_point = (self.BLOCK_WIDTH, model.intercept_)
             end_point = ((468 - model.intercept_) / model.coef_[0], 468)

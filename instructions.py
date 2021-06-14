@@ -1,6 +1,6 @@
 import pygame
 import sys
-from id3 import AlgorithmID3
+from adaboost import AlgorithmID3
 from dbscan import AlgorithmDBSCAN
 from svm import AlgorithmSVM
 from knn import AlgorithmKNN
@@ -35,7 +35,7 @@ class Instructions:
 
     all = pygame.Rect(40, 220, 400, 468)
     # pygame.draw.rect(window, LIGHTGREY, all)
-    intermediate = pygame.surface.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+    intermediate = pygame.surface.Surface((SCREEN_WIDTH, SCREEN_HEIGHT + SCREEN_HEIGHT * 1/2))
     text_window = pygame.surface.Surface((SCREEN_WIDTH, SCREEN_WIDTH))
 
     def initialize_game(self):
