@@ -1,19 +1,20 @@
 import sys
-
 import numpy as np
 import pygame
 from sklearn import metrics, svm
 from sklearn.model_selection import train_test_split
 from AlgorithmWindowClass import AlgorithmWindowClass
-# import instructions
-import sklearn
+from leaderboard import Leaderbord
+from math import sqrt
 
 class AlgorithmSVM(AlgorithmWindowClass):
     TITLE = "SVM"
+    score = []
     pixel_points_red = []
     pixel_points_green = []
+    GREY = (100, 100, 100)
 
-    def draw_svm(self, points):
+    def draw_svm(self, points, user_id):
         model = svm.SVC(kernel='linear')  # Linear Kernel
         model.fit(np.array(points).reshape((-1, 2)), self.pixel_points)
 
@@ -76,7 +77,32 @@ class AlgorithmSVM(AlgorithmWindowClass):
         pygame.draw.line(self.window, self.BLACK, start_point_down, end_point_down, 2)
         pygame.draw.line(self.window, self.DARKORANGE, start_point_up, end_point_up, 2)
 
-    def draw_map(self):
+        dist_func = lambda x, y: sqrt((x[0] - y[0]) ** 2 + (x[1] - y[1]) ** 2)
+        dist1 = dist_func(start_point, self.score[0])
+        dist2 = dist_func(start_point, self.score[1])
+        dist3 = dist_func(end_point, self.score[0])
+        dist4 = dist_func(end_point, self.score[1])
+        final_distance = min(dist1, dist2) + min(dist3, dist4)
+        percent = 100 - final_distance / 880 * 100
+        if percent < 0:
+            percent = 0
+        elif percent > 100:
+            percent = 100
+        params = (percent, user_id)
+        self.cursor.execute(f"SELECT score_{self.TITLE} from users WHERE user_id = ?", [user_id])
+        scor = self.cursor.fetchall()[0][0]
+        if scor is None:
+            self.cursor.execute(f"UPDATE users SET score_{self.TITLE} = ? WHERE user_id = ?", params)
+            self.connection.commit()
+        elif scor < percent:
+            self.cursor.execute(f"UPDATE users SET score_{self.TITLE} = ? WHERE user_id = ?", params)
+            self.connection.commit()
+        self.draw_text(f"Score: {percent:.2f}%", self.BLACK, 25, 385, 450)
+        return percent
+
+
+    def draw_map(self, user_id):
+        leader = False
         draw_point_enabled = True
         draw_decision_enabled = False
         while True:
@@ -115,14 +141,14 @@ class AlgorithmSVM(AlgorithmWindowClass):
                     x, y = event.pos
                     if x1 < x < x2:
                         if y1 < y < y2:
-                            print("Click: ({})".format(event.pos))
                             self.window.set_at(event.pos, self.RED)
                             self.points.append(event.pos)
                             if len(self.points) > 1:
                                 pos1 = self.points.pop()
                                 pos2 = self.points.pop()
+                                self.score.append(pos1)
+                                self.score.append(pos2)
                                 pygame.draw.line(self.window, self.UGLY_PINK, pos1, pos2)
-                                print(f'line drawn pos1:{pos1} pos2:{pos2}')
                                 for i in self.pixel_points_green:
                                     self.pixel_points.append('1')
                                     self.points.append(i)
@@ -132,18 +158,40 @@ class AlgorithmSVM(AlgorithmWindowClass):
                                 draw_decision_enabled = False
                 if self.button_check.collidepoint(pygame.mouse.get_pos()) and event.type == pygame.MOUSEBUTTONDOWN \
                         and not draw_decision_enabled:
-                    self.draw_svm(self.points)
+                    self.draw_svm(self.points, user_id)
+                    self.pixel_points = []
+                    self.pixel_points_green = []
+                    self.pixel_points_red = []
+                    self.points = []
+                    self.button_leaderboard = pygame.Rect(160, 510, 160, 60)  # left #top #width #height
+                    pygame.draw.rect(self.window, self.LIGHTGREY, self.button_leaderboard)
+                    pygame.draw.line(self.window, self.BLACK, (0, 510), (510, 510), 2)
+                    pygame.draw.line(self.window, self.BLACK, (0, 558), (558, 558), 2)
+                    pygame.draw.line(self.window, self.BLACK, (158, 510), (158, 558), 2)
+                    pygame.draw.line(self.window, self.BLACK, (318, 510), (318, 558), 2)
+                    self.draw_text('Leaderboard', self.BLACK, 20, 240, 534)
+                    leader = True
+                elif self.button_leaderboard.collidepoint(pygame.mouse.get_pos()) and event.type == pygame.MOUSEBUTTONDOWN \
+                     and leader is True:
+                    self.pixel_points = []
+                    self.points = []
+                    self.window.fill(self.GREY)
+                    Leaderbord().main(self.TITLE)
                 if self.button_retry.collidepoint(pygame.mouse.get_pos()) and event.type == pygame.MOUSEBUTTONDOWN:
                     self.pixel_points = []
                     self.pixel_points_green = []
                     self.pixel_points_red = []
-                    points = []
-                    self.main()
+                    self.points = []
+                    self.main(user_id)
                 if self.button_back.collidepoint(pygame.mouse.get_pos()) and event.type == pygame.MOUSEBUTTONDOWN:
-                    self.window.fill(self.WHITE)
+                    self.window.fill(self.GREY)
+                    self.pixel_points = []
+                    self.pixel_points_green = []
+                    self.pixel_points_red = []
+                    self.points = []
                     return
             pygame.display.update()
 
-
-if __name__ == "__main__":
-    AlgorithmSVM().main()
+#
+# if __name__ == "__main__":
+#     AlgorithmSVM().main(user_id)

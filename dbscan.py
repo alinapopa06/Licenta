@@ -8,15 +8,14 @@ class AlgorithmDBSCAN(AlgorithmWindowClass):
     TITLE = "DBSCAN"
     backcolor = None
     name = ''
-
+    GREY = (100, 100, 100)
+    button_check = pygame.Rect(160, 510, 160, 60)  # left #top #width #height
     def range_search(self, p, ds, dist_func, eps):
         res = []
         distances = list(map(lambda x: dist_func(x, p), ds))
-        # print(distances)
         for index in range(len(distances)):
             if distances[index] == 0.: continue
             if distances[index] <= eps:
-                print('k', distances[index])
                 res.append(ds[index])
         return res
 
@@ -50,15 +49,15 @@ class AlgorithmDBSCAN(AlgorithmWindowClass):
                     neighbors += new_neighbors
                     nr_neighbors += len(new_neighbors)
                 index += 1
-        print(label)
         for i in label:
             j = label[i]
-            if j == -1:
-                pygame.draw.circle(self.window, self.RED, i, 5, 0)
-            elif j == 0:
-                pygame.draw.circle(self.window, self.GREEN, i, 5, 0)
-            elif j == 1:
-                pygame.draw.circle(self.window, self.BLUE, i, 5, 0)
+            pygame.draw.circle(self.window, self.COLOR_LIST[j], i, 5, 0)
+            # if j == -1:
+            #     pygame.draw.circle(self.window, self.RED, i, 5, 0)
+            # elif j == 0:
+            #     pygame.draw.circle(self.window, self.GREEN, i, 5, 0)
+            # elif j == 1:
+            #     pygame.draw.circle(self.window, self.BLUE, i, 5, 0)
 
     def draw_grid(self):
         pygame.init()
@@ -111,7 +110,6 @@ class AlgorithmDBSCAN(AlgorithmWindowClass):
         self.window.fill(self.WHITE)
         pygame.display.update()
         pygame.draw.rect(self.window, self.LIGHTGREY, self.button_back)
-        pygame.draw.rect(self.window, self.LIGHTGREY, self.button_draw)
         pygame.draw.rect(self.window, self.LIGHTGREY, self.button_check)
         pygame.draw.rect(self.window, self.LIGHTGREY, self.button_retry)
         pygame.draw.line(self.window, self.BLACK, (0, 510), (510, 510), 2)
@@ -184,23 +182,25 @@ class AlgorithmDBSCAN(AlgorithmWindowClass):
                     x, y = event.pos
                     if x1 < x < x2:
                         if y1 < y < y2:
-                            print("Click: ({})".format(event.pos))
                             self.window.set_at(event.pos, self.RED)
                             self.points.append(event.pos)
                 if self.button_check.collidepoint(pygame.mouse.get_pos()) and event.type == pygame.MOUSEBUTTONDOWN:
                     draw_point_enabled = False
-                    print(self.name)
-                    self.draw_dbscan(10, float(self.name))
+                    self.draw_dbscan(5, float(self.name))
                     self.name = ""
                     self.pixel_points = []
+                    self.points = []
                 if self.button_retry.collidepoint(pygame.mouse.get_pos()) and event.type == pygame.MOUSEBUTTONDOWN:
                     self.pixel_points = []
+                    self.points = []
                     self.name = ""
                     self.main()
                 if self.button_back.collidepoint(pygame.mouse.get_pos()) and event.type == pygame.MOUSEBUTTONDOWN:
                     self.pixel_points = []
-                    self.window.fill(self.WHITE)
+                    self.window.fill(self.GREY)
                     self.name = ""
+                    self.points = []
+                    self.pixel_points = []
                     return
             pygame.display.update()
 

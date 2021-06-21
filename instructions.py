@@ -1,6 +1,6 @@
 import pygame
 import sys
-from adaboost import AlgorithmID3
+from adaboost import AlgorithmADABOOST
 from dbscan import AlgorithmDBSCAN
 from svm import AlgorithmSVM
 from knn import AlgorithmKNN
@@ -20,7 +20,8 @@ class Instructions:
     BLACK = (0, 0, 0)
     GREEN = (0, 200, 0)
     WHITE = (255, 255, 255)
-    LIGHTGREY = (210, 210, 210)
+    GREY = (100, 100, 100)
+    LIGHTGREYY = (180, 180, 180)
 
     TITLE = "Instructions"
 
@@ -41,9 +42,9 @@ class Instructions:
     def initialize_game(self):
         pygame.init()
         pygame.display.set_caption(self.TITLE)
-        self.window.fill(self.WHITE)
-        self.text_window.fill(self.BLACK)
-        self.intermediate.fill(self.WHITE)
+        self.window.fill(self.GREY)
+        self.text_window.fill(self.GREY)
+        self.intermediate.fill(self.GREY)
 
     def draw_text(self, window, text, color, size, x, y):
         font_draw = pygame.font.Font(pygame.font.get_default_font(), size)
@@ -52,7 +53,7 @@ class Instructions:
         text_rect.center = (x, y)
         window.blit(text_obj, text_rect)
 
-    def draw_instr(self, my_string):
+    def draw_instr(self, my_string, user_id):
         scroll_y = 0
         self.initialize_game()
         while True:
@@ -72,14 +73,14 @@ class Instructions:
                     if self.button_back.collidepoint(pygame.mouse.get_pos()):
                         return
                     if self.button_start.collidepoint(pygame.mouse.get_pos()):
-                        eval(f'Algorithm{my_string.upper()}().main()')
+                        eval(f'Algorithm{my_string.upper()}().main({user_id})')
             self.window.blit(self.text_window, (0, 0))
             self.text_window.blit(self.intermediate, (0, scroll_y))
 
-            self.draw_text(self.intermediate, 'Instructions', self.BLACK, 20, 240, 50)
+            self.draw_text(self.intermediate, 'Instructions', self.BLACK, 20, 240, 100)
             self.draw_text(self.intermediate, 'Algorithm explained', self.BLACK, 20, 240, 200)
-            pygame.draw.rect(self.window, self.LIGHTGREY, self.button_back)
-            pygame.draw.rect(self.window, self.LIGHTGREY, self.button_start)
+            pygame.draw.rect(self.window, self.LIGHTGREYY, self.button_back)
+            pygame.draw.rect(self.window, self.LIGHTGREYY, self.button_start)
             pygame.draw.line(self.window, self.BLACK, (0, 510), (510, 510), 2)
             pygame.draw.line(self.window, self.BLACK, (238, 510), (238, 558), 2)
 
@@ -88,7 +89,7 @@ class Instructions:
             with open(f'instructions/{my_string}', 'r') as f:
                 string_instr = f.read()
             my_font = pygame.font.Font(None, 22)
-            rendered_text = self.render_textrect(string_instr, my_font, self.all, self.BLACK, self.WHITE, 1)
+            rendered_text = self.render_textrect(string_instr, my_font, self.all, self.BLACK, self.GREY, 1)
             if rendered_text:
                 self.intermediate.blit(rendered_text, self.all.topleft)
             # pygame.draw.rect(window, LIGHTGREY, all)
@@ -144,8 +145,8 @@ class Instructions:
 
         return surface
 
-if __name__ == "__main__":
-    Instructions().draw_instr('id3')
+# if __name__ == "__main__":
+#     Instructions().draw_instr('id3.py')
 
 class TextRectException(Exception):
     def __init__(self, message=None):

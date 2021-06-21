@@ -1,5 +1,5 @@
 import pygame
-
+import sqlite3
 
 class AlgorithmWindowClass:
     SCREEN_WIDTH = 480
@@ -30,6 +30,8 @@ class AlgorithmWindowClass:
     DARKORANGE = (255, 128, 0)
     WHITE = (255, 255, 255)
 
+    COLOR_LIST = [RED, BLUE, GREEN, GOLD, DARKGREEN, DARKORANGE, DARKGREY, LIGHTGREY, UGLY_PINK, BROWN, GREY, BLACK]
+
     VEL = 5
 
     points = []
@@ -37,11 +39,15 @@ class AlgorithmWindowClass:
 
     TITLE = ""
 
+    connection = sqlite3.connect('users.db')
+    cursor = connection.cursor()
+
     all = pygame.Rect(40, 0, 480, 468)
     button_back = pygame.Rect(0, 510, 160, 60)  # left #top #width #height
     button_draw = pygame.Rect(160, 510, 80, 60)  # left #top #width #height
     button_check = pygame.Rect(240, 510, 80, 60)  # left #top #width #height
     button_retry = pygame.Rect(320, 510, 160, 60)  # left #top #width #height
+    button_leaderboard = pygame.Rect(0, 0, 0, 0)
 
     def __init__(self):
         self.display = pygame.Surface((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
@@ -97,11 +103,11 @@ class AlgorithmWindowClass:
             t += 1
             k -= 1
 
-    def draw_map(self):
+    def draw_map(self, user_id):
         # TODO: To be implemented with every child class
         pass
 
-    def main(self):
+    def main(self, user_id):
         self.initialize_game()
         self.draw_grid()
-        self.draw_map()
+        self.draw_map(user_id)
